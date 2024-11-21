@@ -49,11 +49,11 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Cadastrar-se</h2>
-            <form class="form-cadastrar">
-                <input type="text" placeholder="Nome">
-                <input type="email" placeholder="E-mail">
+            <form class="form-cadastrar" action=" {{ url_for('criar') }}" method="post">
+                <input type="text" placeholder="Nome" name="nome">
+                <input type="email" placeholder="E-mail" name="email">
                 <div class="password-wrapper">
-                    <input type="password" placeholder="Senha" id="register-password">
+                    <input type="password" placeholder="Senha" id="register-password" name="senha">
                     <button type="button" class="hold-password" data-target="register-password"><i class="fas fa-eye-slash"></i></button>
                 </div>
                 <div class="modal-buttons">
@@ -219,31 +219,6 @@
         }
     });
 
-    document.querySelector(".cadastrar-btn").addEventListener('click', function(event) {
-        event.preventDefault();
-
-        let allValid = true;
-        const inputs = document.querySelectorAll('.form-cadastrar input');
-
-        inputs.forEach(input => {
-            if (input.value.trim() === '') {
-                input.classList.add('error');
-                allValid = false;
-            }
-
-            if (input.type === "email" && !input.value.includes("@")) {
-                input.classList.add('error');
-                allValid = false;
-            }
-        });
-
-        if (allValid) {
-            
-            
-        } else {
-            alert("Por favor, preencha todos os campos corretamente.");
-        }
-    });
 
     window.addEventListener("scroll", function(event) {
         var header = document.querySelector("#header");
