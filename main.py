@@ -1,10 +1,11 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, session
 import fdb
 
 app = Flask(__name__)
+app.secret_key = 'matheus-lindo'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\Documents\wepay_dados\WePay.FDB'
+database = r'C:\Users\Aluno\PycharmProjects\ProjetoSite2\WePay.FDB'
 user = 'SYSDBA'
 password = 'sysdba'
 
@@ -39,15 +40,40 @@ def index():
     cursor.close()
     return render_template('index.html', usuario=USUARIO)
 
+@app.route('/financas')
+def financas():
+    nome = session.get('nome')
+
+    cursor = con.cursor()
+
+    cursor.execute("SELECT PRECO FROM DESPESA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
+    despesa = 0
+    for item in cursor.fetchall():
+        despesa += item[0]
+
+    cursor.execute("SELECT PRECO FROM RECEITA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
+    receita = 0
+    for item2 in cursor.fetchall():
+        receita += item2[0]
+
+    cursor.execute("SELECT descricao, preco, data FROM DESPESA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
+    historico_despesa = cursor.fetchall()
+
+    cursor.execute("SELECT descricao, preco, data FROM RECEITA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
+    historico_receita = cursor.fetchall()
+
+    cursor.close()
+
+    flash(f"{nome}", "success")
+    return render_template('financas.html', despesa=despesa, receita=receita, historico_despesa=historico_despesa, historico_receita=historico_receita)
+
 @app.route('/criar', methods=['POST'])
 def criar():
     nome = request.form['nome']
     senha = request.form['senha']
     email = request.form['email']
 
-    # Criando o cursor
     cursor = con.cursor()
-
     try:
         # Verificar se o usuário já existe
         cursor.execute("SELECT 1 FROM usuario WHERE NOME = ?", (nome,))
@@ -67,8 +93,60 @@ def criar():
     flash("Usuário cadastrado com sucesso!", "success")
     return redirect(url_for('index'))
 
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    senha = request.form['senha']
+    email = request.form['email']
 
-#
-# # Aperta o play
+    cursor = con.cursor()
+
+    cursor.execute('SELECT senha, id_usuario, nome FROM Usuario WHERE email = ?', (email,))
+    usuario = cursor.fetchone()
+    cursor.close()
+    if usuario and usuario[0] == senha:
+        session['id_usuario'] = usuario[1]
+        session['nome'] = usuario[2]
+        return redirect(url_for('financas'))
+    else:
+        flash("Email ou senha inválidos!", "danger")
+        return render_template('index.html')
+
+
+@app.route('/nova_transacao/<tipo>', methods=['POST'])
+def nova_transacao(tipo):
+    fonte = request.form['descricao']
+    valor = request.form['valor']
+    data = request.form['data']
+    id_usuario = session.get('id_usuario')
+
+    if not id_usuario:
+        flash("Sessão não iniciada", "error")
+        return redirect(url_for('index'))  # ou qualquer outra página de login
+
+    cursor = con.cursor()
+    if tipo == 'saida':
+        cursor.execute('''
+            INSERT INTO despesa (ID_USUARIO, PRECO, DESCRICAO, DATA)
+            VALUES (?,?,?,?)
+        ''', (id_usuario, valor, fonte, data))
+        con.commit()
+    if tipo == 'entrada':
+        cursor.execute('''
+            INSERT INTO receita (ID_USUARIO, PRECO, DESCRICAO, DATA)
+            VALUES (?,?,?,?)
+        ''', (id_usuario, valor, fonte, data))
+        con.commit()
+
+    cursor.close()
+    return redirect(url_for('financas'))
+
+@app.route('/editar/<fonte>/<int:valor>/<tipo>/<data>')
+def editar(fonte, valor, tipo, data):
+    print(fonte)
+    print(valor)
+    print(tipo)
+    print(data)
+    return redirect(url_for('financas'))
+
 if __name__ == '__main__':
     app.run(debug=True)

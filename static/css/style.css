@@ -415,3 +415,28 @@ body.modal-open {
 .hold-password:hover {
     color: #067B5A;
 }
+
+
+.alert {
+    position: fixed;
+    z-index: 9999;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: surgir 4s;
+    padding: 10px 15px;
+    border-radius: 5px;
+    &.error {
+        background: #ff546b;
+    }
+    &.success {
+        background: #007C59;
+    }
+}
+
+@keyframes surgir {
+    0% { opacity: 0; display: block}
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; display: none}
+}
