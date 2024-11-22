@@ -462,6 +462,27 @@ body.modal-open {
     100% { opacity: 0; display: none}
 }
 
+<<<<<<< HEAD
 .tamanho{
 
 }
+=======
+@media (max-width: 433px){
+    .card p{
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 330px){
+    footer{
+        display: block;
+    }
+    .card p{
+        font-size: 10px;
+    }
+    footer img{
+        margin-bottom: 15px;
+    }
+
+}
+>>>>>>> 866994b43fda9edba914ebb63282113fc683d4da
