@@ -62,26 +62,23 @@
           <table id="listaTransacoes">
             <tbody id="lista-despesa">
                 {% for item in historico_despesa %}
-                    <a href="{{ url_for('editar', fonte=item[0], valor=item[1], tipo='saida', data=item[2]) }}" class="a-editar">
-                        <tr>
-                            <td>{{ item[0] }}</td>
-                            <td class="saida" style="color:#ff546b">R$ {{ item[1] }}</td>
-                            <td style="color: #ff546b">Saída</td>
-                            <td>{{ item[2] }}</td>
-                        </tr>
-                    </a>
+                <tr onclick="abrirEditar('{{ item[0] }}', {{ item[1] }}, '{{ item[2] }}', {{ item[3] }}, 'despesa')">
+                    <td>{{ item[0] }}</td>
+                    <td class="saida" style="color:#ff546b">R$ {{ item[1] }}</td>
+                    <td style="color: #ff546b">Saída</td>
+                    <td>{{ item[2] }}</td>
+                    <input type="hidden" id="input-id" value="{{ item[3] }}" />
+                </tr>
                 {% endfor %}
             </tbody>
             <tbody id="lista-receita">
               {% for item in historico_receita %}
-              <a href="{{ url_for('editar', fonte=item[0], valor=item[1], tipo='saida', data=item[2]) }}">
-                <tr>
+                <tr onclick="abrirEditar('{{ item[0] }}', {{ item[1] }}, '{{ item[2] }}', {{ item[3] }}, 'receita')">
                     <td>{{ item[0] }}</td>
                     <td class="saida" style="color:#00B27E">R$ {{ item[1] }}</td>
                     <td style="color:#00B27E">Entrada</td>
                     <td>{{ item[2] }}</td>
                 </tr>
-              </a>
               {% endfor %}
             </tbody>
           </table>
@@ -106,11 +103,29 @@
       </div>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="alert success">
-                <p>Seja bem-vindo, <span>{{ messages[0][1] }}</span></p>
+            <div class="alert {{ messages[0][0] }}">
+                <p><span>{{ messages[0][1] }}</span></p>
             </div>
         {% endif %}
     {% endwith %}
+
+  <div class="modal" id="modalEditaTransacao">
+    <div class="modal-content">
+      <h3>Editar Transação</h3>
+      <form class="forms" id="form-editar" method="post">
+        <input type="text" id="descricao_edit" placeholder="Descrição" name="fonte" required/>
+        <input type="number" id="preco_edit" placeholder="Preço" name="valor" required/>
+        <input type="date" id="data_edit" name="data" required/>
+        <input type="hidden" id="id_edit" name="id"/>
+        <input type="hidden" id="tipo_edit" name="tipo"/>
+      </form>
+      <div class="botoes">
+        <button class="save" id="salvarEdicaoBtn">Salvar</button>
+        <button class="delete" id="excluirEdicaoBtn">Excluir</button>
+      </div>
+      <button class="closeBtn" id="closeModalEdita">Fechar</button>
+    </div>
+  </div>
 
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#121212" fill-opacity="1" d="M0,224L80,213.3C160,203,320,181,480,192C640,203,800,245,960,256C1120,267,1280,245,1360,234.7L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path></svg>
 

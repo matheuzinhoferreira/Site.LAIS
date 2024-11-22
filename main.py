@@ -56,15 +56,15 @@ def financas():
     for item2 in cursor.fetchall():
         receita += item2[0]
 
-    cursor.execute("SELECT descricao, preco, data FROM DESPESA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
+    cursor.execute("SELECT descricao, preco, data, id_despesa FROM DESPESA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
     historico_despesa = cursor.fetchall()
 
-    cursor.execute("SELECT descricao, preco, data FROM RECEITA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
+    cursor.execute("SELECT descricao, preco, data, id_receita FROM RECEITA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
     historico_receita = cursor.fetchall()
 
     cursor.close()
 
-    flash(f"{nome}", "success")
+    flash(f"Seja bem-vindo, {nome}", "success")
     return render_template('financas.html', despesa=despesa, receita=receita, historico_despesa=historico_despesa, historico_receita=historico_receita)
 
 @app.route('/criar', methods=['POST'])
@@ -91,7 +91,7 @@ def criar():
         cursor.close()
 
     flash("Usuário cadastrado com sucesso!", "success")
-    return redirect(url_for('index'))
+    return render_template('index.html')
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -108,7 +108,7 @@ def login():
         session['nome'] = usuario[2]
         return redirect(url_for('financas'))
     else:
-        flash("Email ou senha inválidos!", "danger")
+        flash("Email ou senha inválidos!", "error")
         return render_template('index.html')
 
 
@@ -140,12 +140,53 @@ def nova_transacao(tipo):
     cursor.close()
     return redirect(url_for('financas'))
 
-@app.route('/editar/<fonte>/<int:valor>/<tipo>/<data>')
-def editar(fonte, valor, tipo, data):
-    print(fonte)
-    print(valor)
-    print(tipo)
-    print(data)
+@app.route('/editar_transacao', methods=['POST'])
+def editar():
+    fonte = request.form['fonte']
+    valor = request.form['valor']
+    data = request.form['data']
+    tipo = request.form['tipo']
+    id_transacao = request.form['id']
+
+    if not fonte or not valor or not data or not tipo or not id_transacao:
+        flash("Todos os campos são obrigatórios", 'error')
+        return redirect(url_for('financas'))
+
+    cursor = con.cursor()
+
+    if tipo == 'receita':
+        cursor.execute('''
+            UPDATE RECEITA SET descricao = ?, preco = ?, data = ?
+            WHERE ID_RECEITA = ? 
+        ''', (fonte, valor, data, id_transacao))
+
+    if tipo == 'despesa':
+        cursor.execute('''
+            UPDATE DESPESA SET descricao = ?, preco = ?, data = ?
+            WHERE ID_DESPESA = ? 
+        ''', (fonte, valor, data, id_transacao))
+
+    con.commit()
+    cursor.close()
+
+    return redirect(url_for('financas'))
+
+@app.route('/excluir_transacao', methods=['POST'])
+def excluir():
+    tipo = request.form['tipo']
+    id_transacao = request.form['id']
+
+    cursor = con.cursor()
+
+    if tipo == 'receita':
+        cursor.execute('DELETE FROM RECEITA WHERE ID_RECEITA = ?', (id_transacao,))
+
+    if tipo == 'despesa':
+        cursor.execute('DELETE FROM DESPESA WHERE ID_DESPESA = ?', (id_transacao,))
+
+    con.commit()
+    cursor.close()
+
     return redirect(url_for('financas'))
 
 if __name__ == '__main__':
