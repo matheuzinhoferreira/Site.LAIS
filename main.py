@@ -40,9 +40,14 @@ def index():
     cursor.close()
     return render_template('index.html', usuario=USUARIO)
 
+@app.route('/financas2')
+def financas2():
+    return render_template('financas2.html')
+
 @app.route('/financas')
 def financas():
     nome = session.get('nome')
+
 
     if nome is None:
         flash("Sessão não iniciada", "error")
