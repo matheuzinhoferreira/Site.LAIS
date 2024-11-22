@@ -44,6 +44,10 @@ def index():
 def financas():
     nome = session.get('nome')
 
+    if nome is None:
+        flash("Sessão não iniciada", "error")
+        return redirect(url_for('index'))
+
     cursor = con.cursor()
 
     cursor.execute("SELECT PRECO FROM DESPESA WHERE ID_USUARIO = ?", (session.get('id_usuario'),))
@@ -193,6 +197,12 @@ def excluir():
     cursor.close()
 
     return redirect(url_for('financas'))
+
+@app.route('/sair')
+def sair():
+    session.pop('id_usuario', None)
+    session.pop('nome', None)
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

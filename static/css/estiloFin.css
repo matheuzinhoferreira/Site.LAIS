@@ -52,6 +52,14 @@ header button {
     font-weight: bold;
     transition: background-color 0.3s ease;
 }
+
+.btn-sair{
+    background-color: rgb(255, 84, 107);
+    width: 100px;
+    height: 52px;
+    margin-right: 5px;
+}
+
 #novaTransacaoBtn:hover{
     background-color: #067B5A;
 }
