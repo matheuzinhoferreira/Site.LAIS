@@ -5,7 +5,7 @@ app = Flask(__name__)
 app.secret_key = 'matheus-lindo'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\PycharmProjects\ProjetoSite2\WePay.FDB'
+database = r'C:\Users\Aluno\Documents\GitHub\Site.LAIS\WePay.FDB'
 user = 'SYSDBA'
 password = 'sysdba'
 
@@ -78,6 +78,7 @@ def criar():
         # Verificar se o usuário já existe
         cursor.execute("SELECT 1 FROM usuario WHERE NOME = ?", (nome,))
         if cursor.fetchone():  # Se existir algum registro
+            flash("Email já cadastrado.", "error")
             return redirect(url_for('index'))
 
         # Inserir o novo usuário
@@ -118,6 +119,10 @@ def nova_transacao(tipo):
     valor = request.form['valor']
     data = request.form['data']
     id_usuario = session.get('id_usuario')
+
+    if not fonte or not valor or not data or not id_usuario:
+        flash("Todos os campos são obrigatórios", 'error')
+        return redirect(url_for('financas'))
 
     if not id_usuario:
         flash("Sessão não iniciada", "error")
